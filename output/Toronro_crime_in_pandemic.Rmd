@@ -1,0 +1,105 @@
+---
+title: "In the shadow of the pandemic Analysis of COVID-19's impact on Toronto's crime rate"
+author: 'Shenzhe Lu'
+thanks: "Code and data supporting this analysis is available at:https://github.com/lushenzhe1010/STA302-.git"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+abstract: "The epidemic has had a profound impact on the lives of people in Toronto. During this period, there was a growing perception among individuals that the incidence of criminal activities was on the rise. This article analyzes the fluctuations in crime rates across several regions of Toronto within the ongoing pandemic. The data and photographs clearly show a significant decline in Toronto's crime rate during the pandemic. However, during the next stages of the epidemic, Toronto's crime rate has consistently and steadily risen, without any apparent downward trend. The primary areas where crimes occur are still predominantly focused in Toronto, specifically in the Division51 and Division52(downtown).This presents a more demanding issue for the security administrators in Toronto."
+
+output:
+  pdf_document:
+    latex_engine: xelatex
+toc: TRUE
+bibliography: references.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# Set up libraries
+library(tidyverse)
+library(janitor)
+library(ggplot2)
+
+
+
+```
+
+\newpage
+
+# Introduction
+Toronto has seen some notable changes in its crime rate during the COVID-19 pandemic. Toronto's violent crime index rose significantly in 2022, reaching its highest point since 2007, according to Statistics Canada. The increase was primarily driven by a 15% increase in robbery crimes and an 8% increase in homicides. Despite this, the overall crime index is still lower than pre-pandemic levels.
+As can be seen from the data collection and analysis in this article, Toronto's crime rate has changed during the COVID-19 pandemic, which is reflected in a significant increase in crime in certain areas, which is mainly concentrated in the downtown area of ​​Toronto. These changes reflect the impact of the pandemic on social structure and behavior, as well as the challenges it may pose to law enforcement and policing
+
+
+# Data
+## Police Annual Statistical Report - Reported Crimes
+In order to examine the fluctuations in crime rates in Toronto throughout the pandemic， I collected the dataset "Police Annual Statistical Report - Reported Crimes" from the Toronto Open Data Portal. This covers all documented criminal activities compiled by each department according to the date of reporting. This dataset encompasses all criminal incidents reported to the Toronto Police Service, including both cases that are confirmed as well as those that, upon inquiry, may be determined to be unsubstantiated. The dataset contains 33343 observations and 7 variables, encompassing information such as the year of the event, location, and type of offence. The primary focus of this report will be on the year, location, and quantity of crimes.
+
+```{r}
+crimedata  = 
+  read_csv(
+    file = "input/data/toronto_crime_cleandata.csv",
+    show_col_types = FALSE
+  )
+```
+
+At first, I decided for cleaning the data by keeping only the report_year, division, and count(number of offences), in order to streamline later analysis. The second stage involves computing the aggregate number of offences in each division for each year based on the reported data for each time period.
+
+
+```{r}
+
+grouped_crimes_data <- crimedata %>%
+  group_by(report_year, division) %>%
+  summarise(Total_Crimes = sum(count)) %>%
+  ungroup()
+
+
+```
+```{r}
+top_10_crimes <- grouped_crimes_data %>%
+  arrange(desc(Total_Crimes)) %>%
+  slice_head(n = 10)
+
+
+```
+
+The second stage involves computing the aggregate number of offences in each division for each year based on the reported data for each year.
+
+```{r echo=FALSE, results='asis'}
+library(knitr)
+
+kable(top_10_crimes, caption = "Total Crimes by Division and Year", format = "markdown")
+
+```
+According to the data published by the Toronto Police Service, Division 51 and Division 52 are the primary constituents of downtown Toronto.
+In 2018, in division D51, the number of crimes was 15,809.
+In 2019 in division D51, the number of crimes was 15,015.
+In 2018 in division D52, the number of crimes was 14,399.
+In 2019 in division D52, the number of crimes was 14,356.
+In 2022 in division D51, the number of crimes was 12,798.
+The table indicates that the downtown areas have the greatest crime rates among 2018-2022. This information can assist police agencies and policymakers in gaining a more comprehensive understanding of crime patterns and devising effective strategies to address them.
+
+
+## Toronto crime trends
+```{r}
+
+ggplot(grouped_crimes_data, aes(x = report_year, y = Total_Crimes, group = division, color = division)) +
+  geom_line() +
+  geom_point() +
+  theme_minimal() +
+  labs(title = "Crime Trends by Division Over Years",
+       x = "Year",
+       y = "Total Crimes",
+       color = "Division") +
+  theme(legend.position = "right")
+
+```
+This chart displays the patterns of criminal activity in various police divisions over the course of several years. Each police district is visually distinguished by a distinct colour. There are a total of 15 police districts, along with an additional category labelled "NSA".
+Based on this chart, we can infer the following:
+Crime rates in the majority of police districts have experienced fluctuations throughout the epidemic; nonetheless, the general pattern does not indicate a definitive long-term rise.
+Furthermore, there has been a significant decline in the incidence of criminal activities within the D51 and D52 police districts since the beginning of the pandemic, surpassing all other police districts. Nevertheless, the majority of police districts seem to have encountered an increase in criminal activity around the year 2020, potentially influenced by distinct socio-economic elements and the pandemic. In 2021, crime rates have notably risen in all regions, reaching levels comparable to those before the pandemic. Furthermore, in 2022, crime rates are expected to surpass the pre-pandemic levels uniformly throughout all regions.
+In addition, the NSA's statistics consistently indicate a relatively low number of incidents during the entire duration, potentially encompassing offences that do not fall under the jurisdiction of a particular police district.
+On the whole, the crime patterns depicted in this graphic unequivocally demonstrate the fluctuations in crime rates within the epidemic and already indicate a significant surge in Toronto's crime rate.
+
+#Discussion
+
+Upon analysing the data presented in the paper, it is evident that the crime rate in Toronto has persistently risen following the epidemic, ultimately reaching an unprecedented peak. The report does not establish a causal correlation between crime rates and the epidemic. However, it is important to acknowledge that other more factors contribute to fluctuations in crime rates throughout this time period, apart from the influence of the pandemic. It is imperative for Toronto people to prioritise their personal safety. Simultaneously, it is imperative for the government and local law enforcement to intervene and take action in order to enhance the local crime situation.
