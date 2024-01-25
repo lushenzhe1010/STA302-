@@ -1,3 +1,3 @@
-# STA302 term paper
+# STA302 term paper 1
 
 
